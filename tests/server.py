@@ -13,6 +13,8 @@ def parse_args():
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--file", default=DEFAULT_FILENAME)
     parser.add_argument("--size", type=int, default=DEFAULT_FILE_SIZE)
+    parser.add_argument("--drop-every", type=int, default=0,
+                        help="Ignore every nth GET request (0 disables packet loss)")
     return parser.parse_args()
 
 
@@ -21,6 +23,9 @@ def main():
 
     if args.size <= 0:
         raise ValueError("File size must be positive")
+
+    if args.drop_every < 0:
+        raise ValueError("--drop-every must be non-negative")
 
     if not os.path.exists(args.file):
         pattern = bytes(range(256)) * 4096
@@ -40,12 +45,18 @@ def main():
     print(f"Listening on {args.host}:{args.port}", flush=True)
 
     with open(args.file, "rb") as f:
+        request_count = 0
+
         while True:
             data, addr = sock.recvfrom(4096)
             msg = data.decode('utf-8').strip()
             # print(f"Received from {addr}: {msg}", flush=True)
 
             if msg.startswith("GET"):
+                request_count += 1
+                if args.drop_every > 0 and request_count % args.drop_every == 0:
+                    continue
+
                 parts = msg.split()
                 start = int(parts[1])
                 length = int(parts[2])

@@ -1,15 +1,16 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <map>
-#include <fstream>
-#include <netinet/in.h>
 #include "socket.hpp"
-#include <poll.h>
-#include <iostream>
-#include <cstring>
 #include <arpa/inet.h>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <netinet/in.h>
+#include <poll.h>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace transport
 {
@@ -25,7 +26,8 @@ namespace transport
     private:
         void send_requests();
         void listen_receive();
-        void process_data(int start, int len, const std::string &payload);
+        void process_datagram(std::string_view packet, const sockaddr_in &sender);
+        void process_data(int start, int len, std::string_view payload);
         void flush_file();
         sockaddr_in server_addr;
         std::string ip;
@@ -41,8 +43,9 @@ namespace transport
         int already_done = 0;
         int current_write_pos = 0;
 
-        static constexpr int WINDOW_SIZE = 1200000;
+        static constexpr int WINDOW_SIZE = 120000;
         static constexpr int ROUND_TIME_MS = 300;
-        static constexpr int MAX_DOWNLOAD = 1000;
+        static constexpr int CHUNK_SIZE = 1000;
+        static constexpr int MAX_SENT_PACKETS_BATCH = 100;
     };
-}
+} // namespace transport

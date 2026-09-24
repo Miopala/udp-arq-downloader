@@ -14,7 +14,7 @@ add_executable(transport
 )
 
 target_compile_options(transport PRIVATE
-    -O3 -g -fno-omit-frame-pointer -march=native
+    -O3 -g -fno-omit-frame-pointer
     -Wall -Wextra -Wpedantic 
     -Werror -Wshadow 
     -Wnon-virtual-dtor 
