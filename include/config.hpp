@@ -30,11 +30,17 @@ namespace transport
                 throw std::out_of_range("Port number must be between 0 and 65535.");
             }
 
+            int file_size = std::stoi(argv[4]);
+            if (file_size <= 0)
+            {
+                throw std::out_of_range("File size must be positive.");
+            }
+
             return Config{
                 ip,
                 port,
                 argv[3],
-                std::stoi(argv[4])};
+                file_size};
         }
     };
 }
